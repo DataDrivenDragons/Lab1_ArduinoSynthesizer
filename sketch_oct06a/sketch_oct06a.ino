@@ -1,7 +1,7 @@
 #include <avr/pgmspace.h>
 #define SONGLENGTH 149
 typedef struct note{
-  int size;
+  int ts;
   byte vals[122];
 } note;
 
@@ -22,6 +22,8 @@ typedef enum {
   G5, 
   REST
 } song;
+
+note rest = {1, {0}};
 
 note aa4 = {90, {255,254,253,252,249,247,243,239,235,230,224,218,211,
         204,197,189,181,173,165,156,147,138,129,120,111,102,
@@ -121,8 +123,8 @@ note g5 = {51, {255,253,250,246,239,230,220,208,195,181,166,151,135,119,
         103,88,73,59,46,34,24,15,8,4,1,0,1,4,8,15,24,34,46,59,73,
         88,103,119,135,151,166,181,195,208,220,230,239,246,250,253,255}
       };
-
-/*const int dur[] PROGMEM = {1000, 1000, 1000, 1000, 1000, 1000, 2000, 2000, 2000, 2000,
+/*
+const int dur[] = {1000, 1000, 1000, 1000, 1000, 1000, 2000, 2000, 2000, 2000,
           2000, 3000, 1000, 2000, 3000, 2000, 2000, 1000, 2000, 1500, 1500,
           1500, 2000, 1000, 1000, 1000, 2000, 1000, 1000, 2000, 1000, 3000,
           1000, 2000, 3000, 2000, 2000, 1000, 2000, 1500, 1500, 1500, 2000, 1000,
@@ -149,81 +151,74 @@ song mario[] = {E5, E5, REST, E5, REST, C5, E5, G5, REST, G4, REST, C5,
                C5, REST, C5, D5, E5, C5, C5, C5, REST, C5, D5, E5, C5, 
                AA4, G4, E5, E5, REST, E5, REST, C5, E5, G5, REST, G4, REST};
 */
-const int dur[] PROGMEM = {1000, 1000};
-song mario[] = {AA5, REST};
+const int dur[] PROGMEM = {3000, 3000,};
+song mario[] = {E4, AA4};
 void setup(){
   DDRD = B11111111;
   PORTD = B00000000;
 }
-
+int s;
+int len = floor(3000/90);
+int i = 0;
+note *mNote;
 void loop(){
-  note *mNote;
-  int len;
-  boolean restflag;
-  int i = 0;
-  while (i<SONGLENGTH) {
-    restflag = false;
-    switch(mario[i]) {
-      case AA4:
-        mNote = &aa4;
-        break;
-      case AA5:
-        mNote = &aa5;
-        break;
-      case AS4:
-        mNote = &as4;
-        break;
-      case B4:
-        mNote = &b4;
-        break;
-      case C5:
-        mNote = &c5;
-        break;
-      case CS5:
-        mNote = &cs5;
-        break;
-      case D5:
-        mNote = &d5;
-        break;
-      case DS5:
-        mNote = &ds5;
-        break;
-      case E4:
-        mNote = &e4;
-        break;
-      case E5:
-        mNote = &e5;
-        break;
-      case F5:
-        mNote = &f5;
-        break;
-      case FS5:
-        mNote = &fs5;
-        break;
-      case G4:
-        mNote = &g4;
-        break;
-      case G5:
-        mNote = &g5;
-        break;
-      default:
-        restflag = true;
-    }
-    if (!restflag) {
-      len = floor(dur[i]/mNote->size);
-      for (int j=0; j<len; j++) {
-        for (int i=0; i<=mNote->size; i++) {
-          PORTD = mNote->vals[i];
-          delayMicroseconds(25);
-        }
-      }
-    } else {
-      for (int i=0; i<=dur[i]; i++){
-        PORTD = 0;
-      }
-    }
-    i++;
+  if (i>SONGLENGTH) {
+    i = 0;
   }
+  switch(mario[i]) {
+    case AA4:
+      mNote = &aa4;
+      break;
+    case AA5:
+      mNote = &aa5;
+      break;
+    case AS4:
+      mNote = &as4;
+      break;
+    case B4:
+      mNote = &b4;
+      break;
+    case C5:
+      mNote = &c5;
+      break;
+    case CS5:
+      mNote = &cs5;
+      break;
+    case D5:
+      mNote = &d5;
+      break;
+    case DS5:
+      mNote = &ds5;
+      break;
+    case E4:
+      mNote = &e4;
+      break;
+    case E5:
+      mNote = &e5;
+      break;
+    case F5:
+      mNote = &f5;
+      break;
+    case FS5:
+      mNote = &fs5;
+      break;
+    case G4:
+      mNote = &g4;
+      break;
+    case G5:
+      mNote = &g5;
+      break;
+    default:
+      mNote = &rest;
+  }
+  s = mNote->ts;
+  for (int j=0; j<len; j++) {
+    for (int k=0; k<s; k++) {
+      PORTD = mNote->vals[k];
+      delayMicroseconds(50);
+    }
+  }
+  i++;
 }
 
 
